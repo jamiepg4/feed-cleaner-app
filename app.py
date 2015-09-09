@@ -4,6 +4,7 @@ from flask import Flask
 from flask import request
 from flask import Response
 from honcho import environ
+from unidecode import unidecode
 
 
 app = Flask(__name__)
@@ -33,9 +34,10 @@ def index():
 def read_clean_feed(path):
     feed_url = "%s/%s" % (os.getenv('SOURCE_DOMAIN'), path)
     if request.query_string:
-        feed_url += '?' + request.query_string
+        feed_url += '?' + request.query_string.decode("utf-8")
     feed_resp = requests.get(feed_url)
-    flask_resp = Response(feed_resp.content)
+    cleaned_content = unidecode(feed_resp.content.decode("utf-8","ignore"))
+    flask_resp = Response(cleaned_content)
     flask_resp.headers['content-type'] = feed_resp.headers['content-type']
     return flask_resp
 
